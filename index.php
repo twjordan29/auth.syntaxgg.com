@@ -17,6 +17,7 @@
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css?v=<?php echo time(); ?>" rel="stylesheet" />
+        <script src="https://kit.fontawesome.com/026ca76167.js" crossorigin="anonymous"></script>
     </head>
     <body>
         <!-- Responsive navbar-->

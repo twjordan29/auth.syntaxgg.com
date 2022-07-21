@@ -49,13 +49,23 @@ function send_response($code,$message) {
 
 	if(isset($_SESSION['user'])) {
 		$userId = $_SESSION['user']['id'];
-		$getUser = mysqli_prepare($conn, "SELECT username FROM users WHERE id = ?");
+		$getUser = mysqli_prepare($conn, "SELECT username, seller_level FROM users WHERE id = ?");
 		mysqli_stmt_bind_param($getUser, "i", $userId);
 		mysqli_stmt_execute($getUser);
-		mysqli_stmt_bind_result($getUser, $username);
+		mysqli_stmt_bind_result($getUser, $username, $level);
 		mysqli_stmt_fetch($getUser);
 
 		mysqli_stmt_close($getUser);
+	}
+	
+	if(isset($_SESSION['user'])) {
+		$getWallet = mysqli_prepare($conn, "SELECT amount FROM wallets WHERE wallet_for = ?");
+		mysqli_stmt_bind_param($getWallet, "s", $username);
+		mysqli_stmt_execute($getWallet);
+		mysqli_stmt_bind_result($getWallet, $money);
+		mysqli_stmt_fetch($getWallet);
+
+		mysqli_stmt_close($getWallet);
 	}
 
 	function genLicenseKey($length = 4) {
