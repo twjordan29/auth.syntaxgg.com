@@ -16,7 +16,7 @@
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link rel="stylesheet" href="notifications/css/lobibox.css"/>    
+        <link rel="stylesheet" href="assets/plugins/notifications/css/lobibox.min.css" />  
         <link href="css/styles.css?v=<?php echo time(); ?>" rel="stylesheet" />
         <script src="https://kit.fontawesome.com/026ca76167.js" crossorigin="anonymous"></script>
     </head>
@@ -92,8 +92,9 @@
                             <div class="progress">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="
                                     <?php 
-                                        $getSales = mysqli_prepare($conn, "SELECT id FROM sales WHERE `by` = ?");
-                                        mysqli_stmt_bind_param($getSales, "s", $username);
+                                        $saleStatus = "Approved";
+                                        $getSales = mysqli_prepare($conn, "SELECT id FROM sales WHERE `by` = ? AND `status` = ?");
+                                        mysqli_stmt_bind_param($getSales, "s", $username, $saleStatus);
                                         mysqli_stmt_execute($getSales);
                                         mysqli_stmt_store_result($getSales);
                                         if(mysqli_stmt_num_rows($getSales) == 0) {
@@ -120,8 +121,9 @@
                             <div class="progress">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="
                                     <?php 
-                                        $getSales = mysqli_prepare($conn, "SELECT id FROM sales WHERE `by` = ?");
-                                        mysqli_stmt_bind_param($getSales, "s", $username);
+                                        $saleStatus = "Approved";
+                                        $getSales = mysqli_prepare($conn, "SELECT id FROM sales WHERE `by` = ? AND `status` = ?");
+                                        mysqli_stmt_bind_param($getSales, "s", $username, $saleStatus);
                                         mysqli_stmt_execute($getSales);
                                         mysqli_stmt_store_result($getSales);
                                         if(mysqli_stmt_num_rows($getSales) == 0) {
@@ -177,10 +179,49 @@
                                         <li>You are not authorized to generate a license key for someone who has not paid for our product, by doing this your seller account will be banned and your commission <b>will not</b> be paid out to you.</li>
                                         <li>Sellers get access to their own license keys, sellers can purchase a product of ours for 50-75% off of the regular price, depending on your seller level.</li>
                                         <li>If you made a mistake when granting a new license key, you must immediately revoke it and then get in touch with the developer or administration team to remove it from your license key limit (if you're a level 1 or 2 seller).</li>
-                                        <li>Sellers <b>are not allowed to share</b> their license keys with other people, nor share the products we have. By doing this; you're labelled as a pirate and will be put on a pirate list visible for all script developers. We don't want to do this; we want your support just as much as we want to support you. We're a team here!</li>
+                                        <li>Sellers <b>are not allowed to share</b> their personal license keys with other people, nor share the products we have. By doing this; your account will be deleted, any outstanding commission will be kept, and all your personal keys will be revoked. We don't want to do this; we want your support just as much as we want to support you. We're a team here!</li>
+                                    </ol>
+                                    <li><b>Payment Collections</b> - as a level 1 and level 2 seller, you cannot accept money on behalf of SyntaxScripts.</li>
+                                    <ol>
+                                        <li>If you make a sale as a level 1 or level 2 seller, you must direct the payments to SyntaxScripts directly, you can't collect it to your account, then send it to ours - this is a level 3 seller perk.</li>
+                                        <li>If you collect money on behalf of a us as a level 1 or level 2 seller, you risk the chance of your seller account being removed as well as all the license keys you've granted + your personal keys.</li>
+                                        <li>As a level 3 seller, you can collect payments on behalf of SyntaxScripts - but any funds occured must be delivered to our account within 48 hours.</li>
+                                        <ul>
+                                            <li>Level 3 sellers keep the commission and only send the remaining balance to us <b>after</b> their commission is counted out.</li>
+                                            <li>Level 3 sellers have the option to directly collect the money and then send it to us afterward, or they also have the choice to directly send it to us and keep their wallet on our site. If you choose to collect money on our behalf, your wallet will no longer be active.</li>
+                                        </ul>
                                     </ol>
                                 </ol>
-                            </div>      
+                            </div>  
+                            <div class="mb-3">
+                                <p>Please leave a thumbs up if you have read and understand these terms. Those who haven't put a thumbs up will be warned once then banned if they still haven't read these terms.</p>
+                                <p class="text-small">Please note that we reserve the right to delete seller accounts and keys without warning. Accounts can be deleted for multiple reasons from breaking our terms or if sellers aren't producing results.</p>
+                            </div> 
+                            <div class="d-flex justify-content-between mb-3">
+                                <div id="thumbsUp">
+
+                                </div>
+                                <div>
+                                    <input type="hidden" name="agreeFrom" id="agreeFrom" value="<?php echo $username; ?>">
+                                    <?php 
+                                        $didAgree = mysqli_prepare($conn, "SELECT id FROM thumbs WHERE agree_from = ?");
+                                        mysqli_stmt_bind_param($didAgree, "s", $username);
+                                        mysqli_stmt_execute($didAgree);
+                                        mysqli_stmt_store_result($didAgree);
+                                        mysqli_stmt_fetch($didAgree);
+                                        if(mysqli_stmt_num_rows($didAgree) == 1) {
+                                            echo '<button class="btn btn-success btn-stm float-end" id="sellerAgree" disabled><i class="fa-solid fa-thumbs-up"></i> Thank you for your agreement!</button>';
+                                        } else {
+                                            echo '<button class="btn btn-success btn-stm float-end" id="sellerAgree"><i class="fa-solid fa-thumbs-up"></i> Agree</button>';
+                                        }
+
+                                        mysqli_stmt_close($didAgree);
+                                    ?>
+                                </div>
+                            </div>  
+                            <div class="text-small mb-3">
+                                <b>Agreement:</b> <span id="agreement"></span>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -201,12 +242,40 @@
             </div>
         </div>
         <!-- Bootstrap core JS-->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
-        <script src="notifications/js/lobibox.min.js"></script>
-	    <script src="notifications/js/notifications.min.js"></script>
-	    <script src="notifications/js/notification-custom-script.js"></script>
+        <!--notification js -->
+	    <script src="assets/plugins/notifications/js/lobibox.min.js"></script>
+	    <script src="assets/plugins/notifications/js/notifications.min.js"></script>
+	    <script src="assets/plugins/notifications/js/notification-custom-script.js"></script>
+        <script>
+            $(function(){
+                setInterval(function(){
+                    $('#thumbsUp').load('controllers/thumbs.php');
+                },10);
+                setInterval(function(){
+                    $('#agreement').load('controllers/agreement.php');
+                },10);
+
+                $('#sellerAgree').click(function(){
+                    $.ajax({
+                        type: "POST",
+                        url: "controllers/agree.php",
+                        data: {
+                        },
+                        cache: false,
+                        success: function(data) {
+                            anim1_noti();
+                            $('#sellerAgree').prop('disabled', true);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr);
+                        }
+                    });
+                })
+            })
+        </script>
     </body>
 </html>

@@ -1,13 +1,13 @@
 <?php
 	session_start();
 
-$db["host"] = "localhost";
-// $db["user"] = "ninedulf_auth";
-$db["user"] = "root";
-$db["pass"] = "jordan88";
-$db["name"] = "ninedulf_auth";
+	$db["host"] = "localhost";
+	// $db["user"] = "ninedulf_auth";
+	$db["user"] = "root";
+	$db["pass"] = "jordan88";
+	$db["name"] = "ninedulf_auth";
 
-$conn = mysqli_connect($db["host"],$db["user"],$db["pass"],$db["name"]);
+	$conn = mysqli_connect($db["host"],$db["user"],$db["pass"],$db["name"]);
 
 if(!$conn)
 {
@@ -49,10 +49,10 @@ function send_response($code,$message) {
 
 	if(isset($_SESSION['user'])) {
 		$userId = $_SESSION['user']['id'];
-		$getUser = mysqli_prepare($conn, "SELECT username, seller_level FROM users WHERE id = ?");
+		$getUser = mysqli_prepare($conn, "SELECT username, seller_level, job FROM users WHERE id = ?");
 		mysqli_stmt_bind_param($getUser, "i", $userId);
 		mysqli_stmt_execute($getUser);
-		mysqli_stmt_bind_result($getUser, $username, $level);
+		mysqli_stmt_bind_result($getUser, $username, $level, $job);
 		mysqli_stmt_fetch($getUser);
 
 		mysqli_stmt_close($getUser);

@@ -56,6 +56,37 @@
                         <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>
                 </li>
+                <?php if($job == "Administrator") { ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Tasks </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="logout.php">Pending Sale Reports <span class="badge bg-danger">
+                            <?php 
+                                $status = "Pending";
+                                $getPendingSales = mysqli_prepare($conn, "SELECT id FROM sales WHERE `status` = ?");
+                                mysqli_stmt_bind_param($getPendingSales, "s", $status);
+                                mysqli_stmt_execute($getPendingSales);
+                                mysqli_stmt_store_result($getPendingSales);
+                                mysqli_stmt_fetch($getPendingSales);
+                                    echo mysqli_stmt_num_rows($getPendingSales);
+                                mysqli_stmt_close($getPendingSales);
+                            ?>
+                        </span></a></li>
+                        <li><a class="dropdown-item" href="logout.php">Pending Seller Applications <span class="badge bg-danger">
+                            <?php 
+                                $status = "Pending";
+                                $getPendingApps = mysqli_prepare($conn, "SELECT id FROM applications WHERE `status` = ?");
+                                mysqli_stmt_bind_param($getPendingApps, "s", $status);
+                                mysqli_stmt_execute($getPendingApps);
+                                mysqli_stmt_store_result($getPendingApps);
+                                mysqli_stmt_fetch($getPendingApps);
+                                    echo mysqli_stmt_num_rows($getPendingApps);
+                                mysqli_stmt_close($getPendingApps);
+                            ?>
+                        </span></a></li>
+                    </ul>
+                </li>
+                <?php } ?>
             </ul>
         </div>
     </div>
